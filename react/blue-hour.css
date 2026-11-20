@@ -1,0 +1,61 @@
+:root {
+  color-scheme: dark;
+  --ink: #e9edf5;
+  --muted: #b3c0d1;
+  --surface: #192131;
+  --soft: #242e41;
+  --line: #3b475c;
+  --blue: #31578d;
+  --blue-deep: #274575;
+  --amber: #dcb275;
+  --glass: linear-gradient(133deg, #131c2bf5, #1a2438ee);
+  --shadow: 0 12px 32px #0307154d;
+  --city-photo: url('./assets/firstlight-blue-hour.webp');
+  background: #111522;
+}
+
+a { color: #b4cef4; }
+:focus-visible { outline-color: #efbf7d; }
+.masthead { background: #141a28; border-bottom-color: #303b50; }
+.brand strong { color: var(--ink); }
+.colony-mark { background: linear-gradient(135deg, #78a8d1, #3c5e92); }
+.colony-mark::before { background: #141a28; }
+.header-status { background: #3b3225; color: #f1cea0; }
+footer,.workspace-heading { border-color: var(--line); }
+
+.button { border-color: #55637a; }
+.button:hover { background: #303c50; border-color: #8495ae; }
+.button.primary:hover { background: #40679f; border-color: #40679f; }
+.tabs .button { border-color: transparent; }
+.tabs .button:hover { background: #303c50; }
+.tabs .button[aria-pressed=true] { background: #443826; color: #f5dcba; border-color: #a68052; }
+.section-nav a[aria-current] { border-bottom-color: var(--amber); }
+.panel-head,.dialog-head { background: #212a3c; border-color: var(--line); }
+dialog { border-color: #536078; }
+dialog::backdrop { background: #050916ae; }
+.field input,.field select,.field textarea { background: #111827; border-color: #63718a; }
+.row-wrap,.data>div { border-bottom-color: var(--line); }
+.row-wrap.selected,.message.mine { background: #293d59; }
+.badge,.message,.message.mine,.expression-picker { color: #d6e1f0; border-color: #4a5972; }
+.balance-panel { background: linear-gradient(120deg, var(--surface), #233047); }
+.avatar { background: #293b56; color: #d3e5ff; }
+.notice,.journey-step { background: #2c2b2f; border-color: #66594b; border-left-color: var(--amber); color: #f1dfc8; }
+.notice.error { background: #472b32; border-color: #ad6c74; color: #ffd6d9; }
+.toast { border-left-color: var(--amber); }
+.market-heading,.merchant-bar,.shelf-window { border-color: var(--line); }
+.market-heading h2,.market-category > h3,.merchant-wallet,.shelf-actions .text-link { color: var(--ink); }
+.merchant-ticket,.shelf-product { background: var(--surface); border-color: var(--line); }
+.merchant-ticket-sign {
+  background: linear-gradient(113deg, #232e40, color-mix(in srgb, var(--shop-color) 27%, #212736));
+  color: var(--ink);
+}
+.shelf-photo,.inspection-photo { background: #44454a; }
+.shelf-photo { filter: brightness(.87) saturate(.93); }
+@media (hover: hover) and (pointer: fine) {
+  .shelf-product:hover { border-color: #a2845e; box-shadow: 0 10px 28px #0005; }
+  .shelf-product:hover .shelf-photo { filter: brightness(.97) saturate(1.03); }
+}
+
+.chapter-dot::before { border-color: #bbcae2; }
+.chapter-dot[aria-pressed=true]::before { border-color: var(--amber); background: var(--amber); }
+.chapter-dot:hover { background: var(--soft); }

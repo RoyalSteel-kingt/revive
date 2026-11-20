@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e9e7df"><meta name="description" content="Your personal kiosk in The Revive. Shared inventory, Hyphen Surplus, and a way back into the field."><title>Firstlight Online · Your personal kiosk</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="sky-lines" aria-hidden="true"></div>
+<div class="kiosk-shell">
+<header class="hardware-header"><a class="brand" href="#overview" aria-label="Firstlight Online home">Firstlight Online<span>PERSONAL SERVICE KIOSK</span></a><div class="hardware-meta"><span class="status-light" aria-hidden="true"></span><span id="mode-label">PUBLIC ACCESS</span></div><button id="theme" class="chain-control" aria-label="Pull to switch between day and night" aria-pressed="false" title="Pull for night / day"><span class="chain" aria-hidden="true"></span><span class="chain-weight" aria-hidden="true">◐</span></button></header>
+<div class="terminal-frame">
+<aside class="service-rail"><div class="rail-label">YOUR COUNTERS</div><nav aria-label="Kiosk services"><a href="#overview" data-route="overview"><span class="nav-icon">◈</span><span>Home<small>Your place to begin</small></span></a><a href="#inventory" data-route="inventory"><span class="nav-icon">▦</span><span>Inventory<small>Your secured collection</small></span><b id="inventory-count">—</b></a><a href="#shop" data-route="shop"><span class="nav-icon hyphen-icon">—</span><span>Hyphen Surplus<small>Recovered. Ready again.</small></span></a><a href="#deliveries" data-route="deliveries"><span class="nav-icon">⌂</span><span>Lunehouse<small>Home & deliveries</small></span></a><a href="#messages" data-route="messages"><span class="nav-icon">≈</span><span>Sideband<small>A little closer</small></span></a><a href="#account" data-route="account"><span class="nav-icon">◎</span><span>Your identity<small>Account & access</small></span></a></nav><div class="rail-bottom"><div class="orbit-sticker" aria-hidden="true">GOOD<br>ORBIT<span>KEEP GOING ↗</span></div><p>EARTHWARD SECTOR<br><span>One more good day.</span></p></div></aside>
+<main id="main"><div id="view" tabindex="-1"></div></main>
+</div>
+<footer class="hardware-footer"><span><span class="sf-mark">SF</span> Singularity Foundation · service network</span><span id="storage-status">Waiting for your account</span><button id="profile-button" data-route="account">Sign in ↗</button></footer>
+</div>
+<div class="below-terminal"><span>THE REVIVE / STILL MAKING ROOM FOR YOU.</span><span>FIRSTLIGHT ONLINE · MK.01</span></div>
+<dialog id="dialog" aria-labelledby="dialog-title"><button id="close-dialog" aria-label="Close dialog">×</button><div id="dialog-body"></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="main.js"></script>
+</body></html>

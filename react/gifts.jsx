@@ -1,0 +1,29 @@
+import React,{useState} from 'react';
+import {Panel,Button,Field,Empty,Badge,Modal,Row,Tabs,DefinitionList,ResourceState,useResource,useApp,rpc,money,date} from './core.jsx';
+import {sampleGifts,quoteSample,changeSampleGift,greetings} from '../src/gift-model.js';
+
+export function Gifts(){
+  const {sample}=useApp();
+  const [tab,setTab]=useState('received'),[kind,setKind]=useState('chroma'),[box,setBox]=useState(''),[ids,setIds]=useState([]),[mode,setMode]=useState('template'),[review,setReview]=useState(null),[error,setError]=useState('');
+  const r=useResource({name:'gifts',seed:sampleGifts,load:()=>rpc('get_gifting_workspace'),change:(a,id)=>rpc('change_gifting_workspace',{p_request:id,p_action:a}),reduce:changeSampleGift});
+  const s=r.data;
+  return <ResourceState resource={r}>{s&&<>
+    <div className="toolbar"><Badge>{money(s.balance)}</Badge><Badge>{s.used_items} / 10 items sent today</Badge><Badge>{s.used_chroma} / 5,000 Chroma gifted today</Badge><Button onClick={()=>r.reload()}>Refresh</Button></div>
+    <Tabs value={tab} onChange={setTab} items={[['received','Received'],['sent','Sent'],['prepare','Prepare gift'],['preferences','Preferences']]}/>
+    {tab==='prepare'?<Panel title="Prepare a gift"><form onSubmit={async e=>{e.preventDefault();setError('');const f=Object.fromEntries(new FormData(e.currentTarget));const record={...f,kind,box,ids,letter_mode:mode,amount:Number(f.amount||0)};try{const quote=sample?quoteSample(s,record):await rpc('quote_player_gift',{p_record:record});setReview({type:'send',record,quote});}catch(e){setError(e.message);}}}>
+      <div className="two-columns"><Field label="Recipient" name="handle" placeholder="Name#123456" pattern="[A-Za-z][A-Za-z0-9_]{2,23}#[0-9]{6}" defaultValue={new URLSearchParams(location.search).get('to')||''} required/><Field label="Gift type"><select value={kind} onChange={e=>setKind(e.target.value)}><option value="chroma">Chroma</option><option value="physical">Physical items</option></select></Field></div>
+      {kind==='physical'?<><Field label="Gift Box"><select required value={box} onChange={e=>setBox(e.target.value)}><option value="">Choose a box</option>{s.items.filter(i=>i.def==='gift-box').map(i=><option key={i.id} value={i.id}>Gift Box · {i.id.slice(0,8)}</option>)}</select></Field><div className="selection-list">{s.items.filter(i=>i.def!=='gift-box').map(i=><label className="check" key={i.id}><input type="checkbox" checked={ids.includes(i.id)} onChange={e=>setIds(e.target.checked?[...ids,i.id]:ids.filter(x=>x!==i.id))}/>{i.name} · {i.weight} lb</label>)}</div><Field label="Delivery"><select name="route"><option value="courier">Courier</option><option value="hand">Hand delivery</option></select></Field><p className="muted">Courier {money(s.fees.base_fee)} + {s.fees.per_lb} per lb. Hand delivery {money(s.fees.hand_fee)}.</p></>:<Field label="Chroma amount" name="amount" type="number" min="1" max="5000" required/>}
+      <Field label="Letter"><select value={mode} onChange={e=>setMode(e.target.value)}><option value="template">Greeting</option><option value="personal">Personal letter · friends</option><option value="none">No letter</option></select></Field>
+      {mode==='template'&&<Field label="Greeting"><select name="template">{Object.entries(greetings).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></Field>}
+      {mode==='personal'&&<Field label="Personal letter"><textarea name="letter" maxLength={2000} rows={4}/></Field>}
+      <Button variant="primary" type="submit">Review gift</Button>{error&&<p role="alert">{error}</p>}
+    </form></Panel>:tab==='preferences'?<Panel title="Receiving gifts"><form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);r.mutate({type:'settings',receive_friends:f.has('friends'),receive_strangers:f.has('strangers')});}}><label className="check"><input type="checkbox" name="friends" defaultChecked={s.settings.receive_friends}/> Receive gifts from friends</label><label className="check"><input type="checkbox" name="strangers" defaultChecked={s.settings.receive_strangers}/> Receive gifts from other residents</label><Button variant="primary" type="submit">Save preferences</Button></form></Panel>:<Panel title={tab==='sent'?'Sent gifts':'Received gifts'}>
+      {s.gifts.filter(g=>g.sent===(tab==='sent')).map(g=><Row key={g.id} title={(g.sent?'To ':'From ')+g.handle} detail={date(g.created_at)+' · '+g.status} end={g.kind==='chroma'?money(g.amount):'Physical parcel'}><p>{g.letter}</p><div className="actions">{!g.sent&&g.kind==='chroma'&&g.status==='delivered'&&<Button variant="primary" onClick={()=>setReview({type:'claim',gift:g.id})}>Claim gift</Button>}{!g.sent&&['delivered','preparing','in_transit'].includes(g.status)&&<Button onClick={()=>setReview({type:'return',gift:g.id})}>Return untouched gift</Button>}{g.sent&&g.status==='preparing'&&<Button onClick={()=>setReview({type:'cancel',gift:g.id})}>Cancel before dispatch</Button>}</div></Row>)}
+      {!s.gifts.some(g=>g.sent===(tab==='sent'))&&<Empty title="No gifts here yet"/>}
+    </Panel>}
+    {review&&<Modal title={review.type==='send'?'Review gift to '+review.quote.handle:'Confirm gift change'} onClose={()=>setReview(null)}>
+      {review.quote?<><DefinitionList rows={[['Gift',review.quote.kind==='chroma'?money(review.quote.amount):review.quote.units+' items'],['Delivery',review.quote.route],['Fee',money(review.quote.fee)],['Total',money(review.quote.fee+review.quote.amount)]]}/><p>{review.quote.letter}</p></>:<p>{review.type==='claim'?'Claim this digital gift?':review.type==='cancel'?'Cancel before dispatch?':'Return this untouched gift to its sender?'}</p>}
+      <Button variant="primary" busy={r.busy} onClick={async()=>{if(await r.mutate(review)){setReview(null);setIds([]);}}}>Confirm</Button>{r.error&&<p role="alert">{r.error}</p>}
+    </Modal>}
+  </>}</ResourceState>;
+}

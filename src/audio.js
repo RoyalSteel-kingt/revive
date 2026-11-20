@@ -1,0 +1,11 @@
+export const tracks=[{name:'Soft Landing',notes:[130.81,164.81,196,246.94],pace:.42},{name:'After Hours',notes:[110,130.81,164.81,196],pace:.62},{name:'Blue Transit',notes:[146.83,174.61,220,261.63],pace:.36}];
+export class ListeningCorner{
+ constructor(change){this.change=change;this.ctx=null;this.playing=false;this.track=null;this.timer=null;this.epoch=0;}
+ init(){if(this.ctx)return;const C=window.AudioContext||window.webkitAudioContext;if(!C)throw Error('Audio unavailable');this.ctx=new C();this.master=this.ctx.createGain();this.master.gain.value=.18;this.master.connect(this.ctx.destination);}
+ note(f,time,length,volume){const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,time);g.gain.linearRampToValueAtTime(volume,time+.025);g.gain.exponentialRampToValueAtTime(.001,time+length);o.connect(g).connect(this.master);o.start(time);o.stop(time+length+.02);}
+ click(){try{this.init();this.ctx.resume().catch(()=>{});const o=this.ctx.createOscillator(),g=this.ctx.createGain(),t=this.ctx.currentTime;o.type='triangle';o.frequency.setValueAtTime(600,t);o.frequency.exponentialRampToValueAtTime(90,t+.06);g.gain.setValueAtTime(.035,t);g.gain.exponentialRampToValueAtTime(.001,t+.07);o.connect(g).connect(this.ctx.destination);o.start(t);o.stop(t+.08);}catch{}}
+ async play(i=this.track??0){this.stop();const epoch=this.epoch;this.track=i;this.init();await this.ctx.resume();if(epoch!==this.epoch)return;this.playing=true;this.beat=0;this.next=this.ctx.currentTime+.04;this.master.gain.setTargetAtTime(.18,this.ctx.currentTime,.03);this.schedule();this.timer=setInterval(()=>this.schedule(),80);this.change();}
+ schedule(){if(!this.playing)return;const t=tracks[this.track];while(this.next<this.ctx.currentTime+.18){this.note(t.notes[(this.beat*3)%4]*2,this.next,.7,.15);if(this.beat%4===0){t.notes.forEach(f=>this.note(f,this.next,1.8,.05));this.note(t.notes[0]/2,this.next,1.2,.15);}this.beat++;this.next+=t.pace;}}
+ stop(){this.epoch++;this.playing=false;clearInterval(this.timer);this.timer=null;if(this.ctx)this.master.gain.setTargetAtTime(0,this.ctx.currentTime,.03);this.change();}
+ eject(){this.stop();this.track=null;this.change();}
+}

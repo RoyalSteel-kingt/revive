@@ -1,0 +1,19 @@
+{
+  "name": "firstlight-online",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-react.mjs",
+    "check": "node --check src/main.js && node --check src/live-ui.js && node --check src/backend.js && node --check src/kiosk-art.js && node --test tests/model.test.mjs tests/portal.test.mjs tests/backend.test.mjs tests/database.test.mjs tests/surplus.test.mjs tests/live-ui.test.mjs && node --check src/fluid/app.js && node --check src/fluid/renderer.js && node --check src/fluid/shaders.js && node --check src/fluid/simulation.js && node --test tests/fluid/simulation.test.mjs && node --check src/liquid-kiosk/app.js && node --check src/liquid-kiosk/sound.js && node --check src/liquid-kiosk/gesture.js && node --test tests/fluid/entrance.test.mjs && node --check src/liquid-kiosk/portal.js && node --test tests/fluid/portal.test.mjs && node --check src/liquid-kiosk/catalogue.js && node --check src/liquid-kiosk/object-viewer.js && node --check src/liquid-kiosk/world.js && node --check src/liquid-kiosk/parcel.js && node --test tests/fluid/world.test.mjs && node --test tests/housing.test.mjs tests/housing-ui.test.mjs && node --check src/account.js && node --check src/identity.js && node --test tests/identity.test.mjs tests/identity-database.test.mjs && node --check src/inventory.js && node --check src/inventory-page.js && node --test tests/inventory.test.mjs tests/inventory-ui.test.mjs && node --check src/chroma.js && node --check src/chroma-page.js && node --test tests/chroma.test.mjs tests/chroma-ui.test.mjs && node --check src/hyphen.js && node --check src/hyphen-page.js && node --test tests/hyphen.test.mjs tests/hyphen-ui.test.mjs tests/chroma-ledger.test.mjs && node --check src/checkout.js && node --check src/checkout-ui.js && node --test tests/checkout-database.test.mjs tests/checkout.test.mjs tests/checkout-ui.test.mjs && node --test tests/inventory-workspace.test.mjs && node --test tests/inventory-live-db.test.mjs && node --test tests/inventory-live.test.mjs && node --test tests/inventory-preparation.test.mjs && node --check src/mail.js && node --test tests/mail.test.mjs && node --check src/shops.js && node --test tests/shops.test.mjs && node --test tests/shop-details.test.mjs && node --check src/housing.js && node --test tests/housing-workspace.test.mjs && node --check src/mail-notices.js && node --check src/notice-alerts.js && node --test tests/notices.test.mjs && node --check src/messages.js && node --check src/social-presence.js && node --test tests/social.test.mjs tests/message-images.test.mjs && node --check src/portal-shell.js && node --test tests/portal-navigation.test.mjs && node --check src/gifts.js && node --test tests/gifting.test.mjs && node --check src/collections.js && node --test tests/collections.test.mjs && node --check src/real-rewards.js && node --test tests/real-rewards.test.mjs && node --check src/emoji-picker.js && node --test tests/message-content.test.mjs",
+    "build:legacy": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "three": "0.180.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
+    "esbuild": "0.25.12"
+  }
+}

@@ -1,0 +1,37 @@
+import {mountCollections} from './collections.js';
+import {ReviveBackend} from './backend.js';
+import {ChromaController,formatChroma,filterTransactions} from './chroma.js';
+import {escapeHTML as esc} from './model.js';
+const root=document.querySelector('#chroma'),dialog=document.querySelector('#receipt-dialog');
+const filters={type:'all',search:''};
+const controller=new ChromaController(new ReviveBackend(),render);
+const deltaText=t=>t.kind==='opening'?'Balance checkpoint':(t.delta>0?'+':'−')+formatChroma(Math.abs(t.delta));
+function activity(){
+ const s=controller.state,rows=filterTransactions(s.transactions,filters);
+ document.querySelector('#history-count').textContent=`Showing ${rows.length} of ${s.transactions.length} loaded transactions${s.cursor?' · more available':''}`;
+ document.querySelector('#clear-history').hidden=filters.type==='all'&&!filters.search;
+ document.querySelector('#history-results').innerHTML=rows.map(t=>`<article class="activity-row"><div><span class="eyebrow">${esc(t.source==='hyphen'?'Hyphen Surplus':t.kind==='opening'?'Balance checkpoint':t.source==='savings'?'Savings transfer':'Account activity')}</span><h3>${esc(t.description)}</h3><p class="hint">${esc(new Date(t.created_at).toLocaleString())}</p></div><div class="activity-amount"><strong class="${t.delta>0?'credit':''}">${esc(deltaText(t))}</strong><button class="secondary" data-transaction="${esc(t.id)}">Transaction details</button></div></article>`).join('')||`<div class="empty-history"><h3>${s.transactions.length?'No matching transactions.':'No Chroma transactions recorded.'}</h3><p>${s.transactions.length?'Try another search or clear the filters.':'Changes to your account balance will appear here.'}</p></div>`;
+}
+function render(s){
+ dialog.close();root.setAttribute('aria-busy',String(s.phase==='loading'));
+ root.innerHTML=`${s.error?`<p class="notice error" role="alert">${esc(s.error)}</p>`:''}${s.phase==='loading'?'<p class="notice" role="status">Loading your banking records…</p>':s.phase==='signed_out'?'<section class="panel"><h2>Sign in to Chroma banking.</h2><p>View your account balance and currency transactions across services.</p><a class="button-link" href="./">Sign in to Revive</a></section>':s.phase==='error'?'<section class="panel"><h2>Banking couldn’t be loaded.</h2><button id="refresh">Try again</button><button id="sign-out" class="secondary">Sign out</button></section>':`
+ <div class="chroma-toolbar"><div><strong>${esc(s.user.email||'Your Revive account')}</strong><p class="hint">Last checked ${esc(s.synced.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}))}</p></div><div class="actions"><button id="refresh" class="secondary">Refresh banking</button><button id="sign-out" class="secondary">Sign out</button></div></div>
+ <section class="panel balance-panel" aria-labelledby="balance-title"><span class="eyebrow" id="balance-title">SERVING BALANCE</span>${s.walletError?`<h2 class="balance-unavailable">Balance unavailable</h2><p class="error notice" role="alert">${esc(s.walletError)}</p>`:s.wallet?`<h2 class="balance-value">${esc(Number(s.wallet.balance).toLocaleString())}<span>Chroma</span></h2><p>Available for purchases. Your Collections savings are held separately.</p>`:'<h2>No balance recorded yet.</h2><p>Your account has no recorded Chroma wallet yet. Your balance will appear when a service first records currency activity.</p>'}</section>
+ <div id="collections"></div><section class="panel history-panel" aria-labelledby="history-title"><div class="history-heading"><div><span class="eyebrow">CHROMA BANKING</span><h2 id="history-title">All transactions</h2></div><span class="badge">Across your account</span></div><p class="hint">Account-wide balance changes, including shop payments. Detailed shop receipts stay with the shop.</p>
+ ${s.historyError?`<p class="notice error" role="alert">${esc(s.historyError)}</p><button id="retry-history" class="secondary">Retry transactions</button>`:''}
+ ${s.transactions.length||!s.historyError?`<div class="history-filters"><div><label for="history-search">Search ${s.cursor?'loaded ':''}transactions</label><input id="history-search" type="search" placeholder="Description, source, or transaction ID" value="${esc(filters.search)}"></div><div><label for="history-type">Transaction type</label><select id="history-type">${[['all','All transactions'],['credit','Money in'],['debit','Money out'],['opening','Balance checkpoints'],['savings','Savings transfers']].map(([v,label])=>`<option value="${v}" ${filters.type===v?'selected':''}>${label}</option>`).join('')}</select></div></div><div class="history-count-row"><p id="history-count" class="hint" role="status" aria-live="polite"></p><button id="clear-history" class="secondary">Clear filters</button></div><div id="history-results"></div>${s.cursor?`<div class="load-more"><button id="load-more" ${s.moreLoading?'disabled':''}>${s.moreLoading?'Loading more…':'Load older transactions'}</button><p class="hint">Search and filters apply to loaded transactions.</p></div>`:''}`:''}</section>`}`;
+ const bind=(selector,event,fn)=>root.querySelector(selector)?.addEventListener(event,fn);
+ bind('#refresh','click',()=>controller.load());bind('#retry-history','click',()=>controller.load());bind('#sign-out','click',()=>controller.signOut());bind('#load-more','click',()=>controller.loadMore());
+ bind('#history-search','input',e=>{filters.search=e.target.value;activity();});bind('#history-type','change',e=>{filters.type=e.target.value;activity();});
+ bind('#clear-history','click',()=>{Object.assign(filters,{type:'all',search:''});render(s);document.querySelector('#history-search').focus();});
+ if(s.phase==='ready'){mountCollections(root.querySelector('#collections'),controller.api,s.user.id,()=>controller.load());if(s.transactions.length||!s.historyError)activity();}
+}
+root.addEventListener('click',e=>{
+ const id=e.target.closest('[data-transaction]')?.dataset.transaction;if(!id||controller.state.phase!=='ready')return;
+ const t=controller.state.transactions.find(t=>t.id===id);if(!t)return;
+ document.querySelector('#receipt-details').innerHTML=`<span class="eyebrow">CHROMA / TRANSACTION</span><h2 id="receipt-title">${esc(t.description)}</h2><p class="receipt-delta">${esc(deltaText(t))}</p><dl><dt>Recorded</dt><dd>${esc(new Date(t.created_at).toLocaleString())}</dd><dt>Balance before</dt><dd>${esc(formatChroma(t.balance_before))}</dd><dt>Balance after</dt><dd>${esc(formatChroma(t.balance_after))}</dd><dt>Source</dt><dd>${esc(t.source==='hyphen'?'Hyphen Surplus':t.source==='opening'?'Banking history checkpoint':t.source==='savings'?'Savings transfer':'Account activity')}</dd><dt>Transaction ID</dt><dd>${esc(t.id)}</dd></dl>${t.source==='hyphen'&&t.reference?`<p><a href="hyphen.html?receipt=${encodeURIComponent(t.reference)}">View Hyphen receipt ↗</a></p>`:''}<p class="hint">${t.kind==='opening'?'A checkpoint records an existing balance without counting it as new income.':t.source==='savings'?'This moves your own Chroma between Serving and savings. It is excluded from Money in and Money out filters; any deployment fee is stated in the description.':'This records a change to your Serving balance.'} Your current balance is shown on the banking page.</p>`;
+ dialog.showModal();
+});
+document.querySelector('#close-receipt').addEventListener('click',()=>dialog.close());
+window.addEventListener('storage',e=>{if(e.key==='revive-auth-v1'||e.key===null)location.reload();});
+controller.load();

@@ -1,0 +1,51 @@
+--- a/Assets/Scripts/ReviveAccountClient.cs
++++ b/Assets/Scripts/ReviveAccountClient.cs
+@@ -106,6 +106,21 @@
+             if (item.id == id && item.location == "stash" && item.definition_id == "flux-rifle" && item.condition > 0)
+             { SelectedLoadoutId = id; return; }
+     }
++    // These are owned account records, not client authority to spawn equipment.
++    // The mission server still validates and reserves the selected rifle UUID.
++    public ItemInstance EquippedItem(string position)
++    {
++        foreach (ItemInstance item in Inventory)
++            if (item.inventory_position == position && (item.location == "stash" || item.location == "mission")) return item;
++        return null;
++    }
++    public void UseSavedEquipment()
++    {
++        SelectedLoadoutId = "";
++        ItemInstance primary = EquippedItem("primary");
++        if (primary != null && primary.location == "stash" && primary.definition_id == "flux-rifle" && primary.condition > 0)
++            SelectedLoadoutId = primary.id;
++    }
+     public bool SignedIn { get { return !string.IsNullOrEmpty(accessToken); } }
+     private string accessToken = "";
+     private string refreshToken = "";
+@@ -120,7 +135,7 @@
+     [Serializable] public class Profile { public string id; public string username; public string discriminator; }
+     [Serializable] private class ProfileList { public Profile[] items; }
+     [Serializable] public class Definition { public string name; public string category; public string description; }
+-    [Serializable] public class ItemInstance { public string id; public string owner_id; public string definition_id; public int condition; public string location; public string source; public Definition item_definitions; }
++    [Serializable] public class ItemInstance { public string id; public string owner_id; public string definition_id; public int condition; public string location; public string source; public string inventory_position; public Definition item_definitions; }
+     [Serializable] private class InventoryList { public ItemInstance[] items; }
+     [Serializable] private class EmailRequest { public string email; public bool create_user = true; }
+     [Serializable] private class VerifyRequest { public string email; public string token; public string type = "email"; }
+@@ -213,13 +228,13 @@
+         ProfileList profiles = JsonUtility.FromJson<ProfileList>("{\"items\":" + responseBody + "}");
+         Profile profile = profiles.items != null && profiles.items.Length > 0 ? profiles.items[0] : null;
+         Username = profile == null ? "" : profile.username + (string.IsNullOrEmpty(profile.discriminator) ? "" : "#" + profile.discriminator);
+-        yield return Request("/rest/v1/item_instances?select=id,owner_id,definition_id,condition,location,source,item_definitions(name,category,description)&owner_id=eq." + owner, "GET", null, true);
++        yield return Request("/rest/v1/item_instances?select=id,owner_id,definition_id,condition,location,source,inventory_position,item_definitions(name,category,description)&owner_id=eq." + owner, "GET", null, true);
+         if (!requestSucceeded) yield break;
+         InventoryList result = JsonUtility.FromJson<InventoryList>("{\"items\":" + responseBody + "}");
+         Inventory = result.items ?? new ItemInstance[0]; InventoryRevision++;
+-        bool selectionExists = false;
+-        foreach (ItemInstance item in Inventory) if (item.id == SelectedLoadoutId && item.location == "stash" && item.condition > 0) selectionExists = true;
+-        if (!selectionExists) SelectedLoadoutId = "";
++        // Refresh is an explicit sync point with the website. Only the primary rifle
++        // is implemented by the current mission server; other positions are readable.
++        UseSavedEquipment();
+         Status = string.IsNullOrEmpty(Username) ? "Signed in. Choose a public username on the website or below." : "Loaded " + Inventory.Length + " item(s) for " + Username + ". Compare their IDs with the website.";
+     }
+     public void RegisterUsername(string username)

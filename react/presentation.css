@@ -1,0 +1,26 @@
+/* Focused capstone presentation enhancement; other website routes remain unchanged. */
+.presentation-interface {display:flex;justify-content:center;align-items:flex-start;min-height: min(760px, 80vh);padding: clamp(22px, 4vw, 54px) 12px 44px;}
+.presentation-interface .presentation-stage {width:min(100%, 840px);max-width:840px;text-align:left;margin-inline:auto;padding:clamp(22px, 4.3vw, 50px);background:linear-gradient(155deg,#ffffffef 0%,#f4f7f6 100%);border:1px solid #d7e1df;border-radius:16px;box-shadow:0 12px 40px #1a3c4710;}
+.presentation-topline {display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;letter-spacing:.12em;font-weight:750;color:var(--muted);}
+.presentation-interface .chapter-position {margin:0;font-size:12px;font-weight:750;color:var(--muted);}
+.presentation-progress {height:3px;background:#dbe9e7;overflow:hidden;border-radius:5px;margin:13px 0 clamp(30px,4.6vw,56px);}
+.presentation-progress span {height:100%;display:block;background:var(--blue);transition:width 180ms ease;}
+.presentation-interface .presentation-copy {min-height:0;display:block;}
+.presentation-interface .chapter-content {animation:page-enter var(--enter) var(--ease) both;}
+.presentation-eyebrow {color:var(--blue-deep, #21576c)!important;font-size:11px!important;letter-spacing:.17em;text-transform:uppercase;font-weight:800;margin:0 0 16px!important;}
+.presentation-interface .chapter-content h2 {font-size:clamp(35px,5.8vw,64px);max-width:20ch;text-align:left;margin:0 0 14px;line-height:1.04;}
+.presentation-interface .chapter-content .presentation-subtitle {font-size:clamp(17px,2vw,22px);font-weight:700;line-height:1.35;max-width:55ch;margin:0 0 18px;text-align:left;color:var(--ink);}
+.presentation-interface .chapter-content .presentation-body {line-height:1.65;font-size:clamp(15px,1.8vw,17px);max-width:69ch;margin:0 0 22px;text-align:left;}
+.presentation-points {display:grid;gap:11px;margin:0;padding:0;list-style:none;}
+.presentation-points li {padding-left:20px;position:relative;line-height:1.5;font-size:15px;}
+.presentation-points li::before {content:'';position:absolute;top:.63em;left:1px;width:7px;height:7px;border-radius:2px;background:var(--blue);}
+.presentation-demo {margin-top:24px;border-top:1px solid #d7e1df;padding-top:18px;}
+.presentation-demo-label {font-weight:750;font-size:13px;margin:0 0 11px!important;color:var(--ink);}
+.presentation-demo-links {display:flex;flex-wrap:wrap;gap:10px;}
+.presentation-demo-links a {display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:10px 15px;border:1px solid var(--blue);border-radius:7px;background:var(--blue);color:white;font-size:14px;font-weight:700;text-decoration:none;}
+.presentation-demo-links a:hover,.presentation-demo-links a:focus-visible {filter:brightness(.9);text-decoration:underline;}
+.presentation-interface .presentation-controls {margin-top:30px;padding-top:18px;}
+.presentation-interface .chapter-picker {gap:1px;flex-wrap:wrap;justify-content:center;}
+.presentation-tip {font-size:12px;line-height:1.4;color:var(--muted);text-align:center;margin:16px 0 0;}
+@media(max-width:620px) { .presentation-interface {padding:15px 0 25px;} .presentation-interface .presentation-stage {padding:20px 16px;} .presentation-interface .presentation-controls {grid-template-columns:1fr 1fr;gap:8px;} .presentation-interface .chapter-picker {grid-column:1/-1;grid-row:1;} .presentation-interface .chapter-content h2 {font-size:clamp(32px,8vw,46px);} }
+@media(prefers-reduced-motion:reduce){.presentation-progress span {transition:none;} .presentation-interface .chapter-content {animation:none;}}
